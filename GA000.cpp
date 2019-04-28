@@ -13,20 +13,23 @@ ofstream outfile;
 #define populationnumber 200  //每一代种群的个体数
 
 double crossoverrate = 0.6;            //交叉概率
-double mutationrate = 0.05;             //变异概率
-int G = 100;                        //循环代数100
+double mutationrate = 0.02;             //变异概率
+int G = 100;                      //循环代数100
 int usetime[workpiecesnumber][ordernumber];  //第几个工件第几道工序的加工用时；
 int machinetime[ordernumber][parallel] = { 0 }; //第几道工序的第几台并行机器的统计时间；
 int starttime[workpiecesnumber][ordernumber][parallel];//第几个工件第几道工序在第几台并行机上开始加工的时间；
 int finishtime[workpiecesnumber][ordernumber][parallel];//第几个工件第几道工序在第几台并行机上完成加工的时间；
-int ttime[populationnumber];      //个体的makespan；                                                    ？？？？？？？？？？？？？？？？？？？？？？？
+int ttime[populationnumber];      //个体的makespan；                                            
 int a[populationnumber][workpiecesnumber];//第几代的染色体顺序，即工件加工顺序；
 int times[100];  //用来存储已知用时的数组；
 int makespan;    //总的流程加工时间；
 int flg7;   //暂时存储流程加工时间；
 double fits[populationnumber];//存储每一代种群每一个个体的适应度，便于进行选择操作；
-																					   //？？？？？？？？？？？？？？？？
-int initialization()   //初始化种群；
+
+int tmpStore[populationnumber];//用来输出每代个体数值
+
+
+int initialization()   //初始化种群；种群中个体相同 排列各不同
 {
 	for (int i = 0; i < populationnumber; i++)     //首先生成一个工件个数的全排列的个体；
 		for (int j = 0; j < workpiecesnumber; j++)
@@ -43,7 +46,6 @@ int initialization()   //初始化种群；
 			a[i][flg1] = a[i][flg2];
 			a[i][flg2] = flg3;
 		}
-
 	for (int i = 0; i < populationnumber; i++)
 	{
 		for (int j = 0; j < workpiecesnumber; j++)
@@ -55,7 +57,7 @@ int initialization()   //初始化种群；
 	return 0;
 }
 
-int fitness(int c)   //计算适应度函数，c代表某个体；
+void fitness(int c)   //计算适应度函数，c代表某个体；
 {
 	int totaltime;      //总的加工流程时间（makespan）；
 	int temp1[workpiecesnumber] = { 0 };
@@ -133,45 +135,33 @@ int fitness(int c)   //计算适应度函数，c代表某个体；
 	fits[c] = 1.000 / makespan;          //将makespan取倒数作为适应度函数；
 }
 
-
-
-int gant(int c)                   //该函数是为了将最后的结果便于清晰明朗的展示并做成甘特图，对问题的结果以及问题的解决并没有影响；
+void gant(int c)                   //该函数是为了将最后的结果便于清晰明朗的展示并做成甘特图，对问题的结果以及问题的解决并没有影响；
 {
-
 	int totaltime;
 	char machine[ordernumber*parallel][100] = { "0" };
-
 	int temp1[workpiecesnumber] = { 0 }; //jiagongshunxu
 	int temp2[workpiecesnumber] = { 0 }; //shangyibuzhou de wan cheng shijian
 	int temp3[workpiecesnumber] = { 0 };
-
 	//////////////////////////////////////////
 	for (int j = 0; j < workpiecesnumber; j++)
 	{
 		temp1[j] = a[c][j];
 	}
 	for (int i = 0; i < ordernumber; i++)
-
 	{
-
-
 		for (int j = 0; j < workpiecesnumber; j++)
 		{
-
 			int m = machinetime[i][0];
 			int n = 0;
-
 			for (int p = 0; p < parallel; p++) //找出时间最小的机器；
 			{
 				if (m > machinetime[i][p])
 				{
 					m = machinetime[i][p];
 					n = p;
-
 				}
 			}
 			int q = temp1[j];
-
 			starttime[q - 1][i][n] = max(machinetime[i][n], temp3[j]);
 			machinetime[i][n] = starttime[q - 1][i][n] + usetime[q - 1][i];
 			finishtime[q - 1][i][n] = machinetime[i][n];
@@ -192,9 +182,7 @@ int gant(int c)                   //该函数是为了将最后的结果便于清晰明朗的展示并
 				else
 					machine[i * 2 + n][h] = '6';
 			}
-
 		}
-
 		int flg2[workpiecesnumber] = { 0 };
 		for (int s = 0; s < workpiecesnumber; s++)
 		{
@@ -217,7 +205,6 @@ int gant(int c)                   //该函数是为了将最后的结果便于清晰明朗的展示并
 				}
 			}
 		}
-
 		for (int e = 0; e < workpiecesnumber; e++)
 		{
 			temp1[e] = flg2[e];
@@ -225,13 +212,11 @@ int gant(int c)                   //该函数是为了将最后的结果便于清晰明朗的展示并
 			//cout<<"temp3=="<<temp3[e]<<endl;
 		}
 	}
-
 	totaltime = 0;
 	for (int i = 0; i < parallel; i++)
 		if (totaltime < machinetime[ordernumber - 1][i])
 		{
 			totaltime = machinetime[ordernumber - 1][i];
-
 		}
 	cout << "total=" << totaltime << endl;
 	outfile << totaltime << endl;///////////////////////////////////////////////////////////////////////////////
@@ -246,10 +231,9 @@ int gant(int c)                   //该函数是为了将最后的结果便于清晰明朗的展示并
 		outfile << endl;
 		cout << endl;
 	}
-
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-int select()
+void select()
 {
 	double roulette[populationnumber + 1] = { 0.00 };	//记录轮盘赌的每一个概率区间；
 	double pro_single[populationnumber];			//记录每个个体出现的概率，即个体的适应度除以总体适应度之和；
@@ -260,13 +244,11 @@ int select()
 	{
 		totalfitness = totalfitness + fits[i];
 	}
-
 	for (int i = 0; i < populationnumber; i++)
 	{
 		pro_single[i] = fits[i] / totalfitness;   	//计算每个个体适应度与总体适应度之比；
 		roulette[i + 1] = roulette[i] + pro_single[i]; //将每个个体的概率累加，构造轮盘赌；
 	}
-
 	for (int i = 0; i < populationnumber; i++)
 	{
 		for (int j = 0; j < workpiecesnumber; j++)
@@ -274,7 +256,6 @@ int select()
 			a1[i][j] = a[i][j];               //a1暂时存储a的值；
 		}
 	}
-
 	for (int i = 0; i < populationnumber; i++)
 	{
 		int a2;   //当识别出所属区间之后，a2记录区间的序号；
@@ -289,11 +270,8 @@ int select()
 			a[i][m] = a1[a2][m];
 		}
 	}
-
-
 }
-
-int crossover()
+void crossover()
 /*种群中的个体随机进行两两配对，配对成功的两个个体作为父代1和父代2进行交叉操作。
 随机生成两个不同的基因点位，子代1继承父代2基因位之间的基因片段，其余基因按顺序集成父代1中未重复的基因；
 子代2继承父代1基因位之间的基因片段，其余基因按顺序集成父代2中未重复的基因。*/
@@ -387,7 +365,7 @@ int crossover()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int mutation()  //变异操作为两点变异，随机生成两个基因位，并交换两个基因的位置；
+void mutation()  //变异操作为两点变异，随机生成两个基因位，并交换两个基因的位置；
 {
 	int n3 = rand() % 20;
 	if (n3 == 2)
@@ -405,7 +383,7 @@ int mutation()  //变异操作为两点变异，随机生成两个基因位，并交换两个基因的位置；
 int main()
 {
 	ifstream ifs("input.txt");
-	outfile.open("output.txt");
+	outfile.open("output2.txt");
 	if (!ifs)
 	{
 		cout << "打开文件失败！" << endl;
@@ -423,13 +401,11 @@ int main()
 	cout << endl;
 	for (int i = 0; i < workpiecesnumber; i++)
 	{
-
 		for (int j = 0; j < ordernumber; j++)
 		{
 			usetime[i][j] = times[ordernumber*i + j];
 			cout << usetime[i][j] << "  ";
 		}
-
 		cout << endl;
 	}
 	cout << "//////////////////////////////////////////////////" << endl;;
@@ -442,23 +418,40 @@ int main()
 			fitness(c);
 			ttime[c] = makespan;
 		}
+		//for (int i = 0; i < populationnumber; i++)
+		//	tmpStore[i] = ttime[i];
+		//sort(tmpStore, tmpStore + populationnumber);
+		//for (int i = 0; i < populationnumber; i++)
+		//	cout << tmpStore[i] << endl;
+		//cout << "===============================" << endl;
 		select();     //选择操作；
 		crossover();  //交叉操作；
 		mutation();   //变异操作；
 	}
+	for (int c = 0; c < populationnumber; c++)//计算每个个体适应度并存在ttime中；
+	{
+		fitness(c);
+		ttime[c] = makespan;
+	}
+	//cout << "*******************************" << endl;
+	//for (int i = 0; i < populationnumber; i++)
+	//	tmpStore[i] = ttime[i];
+	//sort(tmpStore, tmpStore + populationnumber);
+	//for (int i = 0; i < populationnumber; i++)
+	//	cout << tmpStore[i] << endl;
+	//cout << "*******************************" << endl;
 
 	int flg8 = ttime[0];
 	int flg9 = 0;
-	for (int c = 0; c < populationnumber - 1; c++)  //计算最后一代每个个体的适应度，并找出最优个体；
+	for (int c = 0; c < populationnumber; c++)  //计算最后一代每个个体的适应度，并找出最优个体；
 	{
-
 		if (ttime[c] < flg8)
 		{
 			flg8 = ttime[c];
 			flg9 = c;
 		}
 	}
-	gant(flg9);   //画出简易的流程图；
+	gant(flg9);    //画出简易的流程图；
 	outfile.close();
 	return 0;
 }
