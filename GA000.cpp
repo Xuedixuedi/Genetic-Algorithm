@@ -5,20 +5,21 @@
 #include <time.h>
 #include <algorithm>
 using namespace std;
+
 ofstream outfile;
-#define machinenumber 6  //»úÆ÷µÄ×ÜÊı£¨µÈÓÚÃ¿µÀ¹¤ĞòµÄ²¢ĞĞ»ú¸öÊı¡Á¹¤ĞòÊı£©
-#define parallel 2       //Ã¿µÀ¹¤ĞòµÄ²¢ĞĞ»ú¸öÊı
+#define MAXPARALLEL 30
 #define ordernumber 3     //¹¤ĞòÊı
-#define workpiecesnumber 6  //¹¤¼ş×ÜÊı
-#define populationnumber 200  //Ã¿Ò»´úÖÖÈºµÄ¸öÌåÊı
+#define workpiecesnumber 8  //¹¤¼ş×ÜÊı
+#define populationnumber 1000  //Ã¿Ò»´úÖÖÈºµÄ¸öÌåÊı
+int parallel[ordernumber];
 
 double crossoverrate = 0.6;            //½»²æ¸ÅÂÊ
 double mutationrate = 0.02;             //±äÒì¸ÅÂÊ
-int G = 100;                      //Ñ­»·´úÊı100
+int G = 1000;                       //Ñ­»·´úÊı100
 int usetime[workpiecesnumber][ordernumber];  //µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòµÄ¼Ó¹¤ÓÃÊ±£»
-int machinetime[ordernumber][parallel] = { 0 }; //µÚ¼¸µÀ¹¤ĞòµÄµÚ¼¸Ì¨²¢ĞĞ»úÆ÷µÄÍ³¼ÆÊ±¼ä£»
-int starttime[workpiecesnumber][ordernumber][parallel];//µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòÔÚµÚ¼¸Ì¨²¢ĞĞ»úÉÏ¿ªÊ¼¼Ó¹¤µÄÊ±¼ä£»
-int finishtime[workpiecesnumber][ordernumber][parallel];//µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòÔÚµÚ¼¸Ì¨²¢ĞĞ»úÉÏÍê³É¼Ó¹¤µÄÊ±¼ä£»
+int machinetime[ordernumber][MAXPARALLEL] = { 0 }; //µÚ¼¸µÀ¹¤ĞòµÄµÚ¼¸Ì¨²¢ĞĞ»úÆ÷µÄÍ³¼ÆÊ±¼ä£»
+int starttime[workpiecesnumber][ordernumber][MAXPARALLEL];//µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòÔÚµÚ¼¸Ì¨²¢ĞĞ»úÉÏ¿ªÊ¼¼Ó¹¤µÄÊ±¼ä£»
+int finishtime[workpiecesnumber][ordernumber][MAXPARALLEL];//µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòÔÚµÚ¼¸Ì¨²¢ĞĞ»úÉÏÍê³É¼Ó¹¤µÄÊ±¼ä£»
 int ttime[populationnumber];      //¸öÌåµÄmakespan£»                                            
 int a[populationnumber][workpiecesnumber];//µÚ¼¸´úµÄÈ¾É«ÌåË³Ğò£¬¼´¹¤¼ş¼Ó¹¤Ë³Ğò£»
 int times[100];  //ÓÃÀ´´æ´¢ÒÑÖªÓÃÊ±µÄÊı×é£»
@@ -27,7 +28,6 @@ int flg7;   //ÔİÊ±´æ´¢Á÷³Ì¼Ó¹¤Ê±¼ä£»
 double fits[populationnumber];//´æ´¢Ã¿Ò»´úÖÖÈºÃ¿Ò»¸ö¸öÌåµÄÊÊÓ¦¶È£¬±ãÓÚ½øĞĞÑ¡Ôñ²Ù×÷£»
 
 int tmpStore[populationnumber];//ÓÃÀ´Êä³öÃ¿´ú¸öÌåÊıÖµ
-
 
 int initialization()   //³õÊ¼»¯ÖÖÈº£»ÖÖÈºÖĞ¸öÌåÏàÍ¬ ÅÅÁĞ¸÷²»Í¬
 {
@@ -46,14 +46,14 @@ int initialization()   //³õÊ¼»¯ÖÖÈº£»ÖÖÈºÖĞ¸öÌåÏàÍ¬ ÅÅÁĞ¸÷²»Í¬
 			a[i][flg1] = a[i][flg2];
 			a[i][flg2] = flg3;
 		}
-	for (int i = 0; i < populationnumber; i++)
-	{
-		for (int j = 0; j < workpiecesnumber; j++)
-		{
-			cout << a[i][j] << " ";
-		}
-		cout << endl;
-	}
+	//for (int i = 0; i < populationnumber; i++)
+	//{
+	//	for (int j = 0; j < workpiecesnumber; j++)
+	//	{
+	//		cout << a[i][j] << " ";
+	//	}
+	//	cout << endl;
+	//}
 	return 0;
 }
 
@@ -67,6 +67,8 @@ void fitness(int c)   //¼ÆËãÊÊÓ¦¶Èº¯Êı£¬c´ú±íÄ³¸öÌå£»
 	for (int j = 0; j < workpiecesnumber; j++)   //temp1ÔİÊ±´æ´¢¸öÌåcµÄ»ùÒòĞòÁĞ£¬ÒÔ±ã½øĞĞ²»Í¬Á÷³ÌÖ®¼äµÄ¼Ó¹¤Ê±¼ÇÂ¼¹¤¼ş¼Ó¹¤ÏÈºóË³Ğò£»
 	{
 		temp1[j] = a[c][j];
+		temp2[j] = (a[c][j] - 1);
+		temp3[j] = (a[c][j] - 1);
 	}
 
 	for (int i = 0; i < ordernumber; i++)
@@ -75,7 +77,7 @@ void fitness(int c)   //¼ÆËãÊÊÓ¦¶Èº¯Êı£¬c´ú±íÄ³¸öÌå£»
 		{
 			int m = machinetime[i][0];        //ÏÈ¼ÇÂ¼µÚiµÀ¹¤ĞòµÄµÚÒ»Ì¨²¢ĞĞ»úÆ÷µÄµ±Ç°¹¤×÷Ê±¼ä£»
 			int n = 0;
-			for (int p = 0; p < parallel; p++) //ÓëÆäËû²¢ĞĞ»úÆ÷½øĞĞ±È½Ï£¬ÕÒ³öÊ±¼ä×îĞ¡µÄ»úÆ÷£»
+			for (int p = 0; p < parallel[i]; p++) //ÓëÆäËû²¢ĞĞ»úÆ÷½øĞĞ±È½Ï£¬ÕÒ³öÊ±¼ä×îĞ¡µÄ»úÆ÷£»
 			{
 				if (m > machinetime[i][p])
 				{
@@ -89,13 +91,12 @@ void fitness(int c)   //¼ÆËãÊÊÓ¦¶Èº¯Êı£¬c´ú±íÄ³¸öÌå£»
 			finishtime[q - 1][i][n] = machinetime[i][n];                 //¹¤¼şµÄÍê¹¤Ê±¼ä¾ÍÊÇ¸Ã»úÆ÷µ±Ç°µÄÀÛ¼Æ¼Ó¹¤Ê±¼ä£»
 			temp2[j] = finishtime[q - 1][i][n];       //½«Ã¿¸ö¹¤¼şµÄÍê¹¤Ê±¼ä¸³Óètemp2£¬¸ù¾İÍê¹¤Ê±¼äµÄ¿ìÂı£¬±ãÓÚ¾ö¶¨ÏÂÒ»µÀ¹¤ĞòµÄ¹¤¼ş¼Ó¹¤Ë³Ğò£»
 		}
-
 		int flg2[workpiecesnumber] = { 0 };           //Éú³ÉÔİÊ±Êı×é£¬±ãÓÚ½«temp1ºÍtemp2ÖĞµÄ¹¤¼şÖØĞÂÅÅÁĞ£»
 		for (int s = 0; s < workpiecesnumber; s++)
 		{
 			flg2[s] = temp1[s];
 		}
-
+		//
 		for (int e = 0; e < workpiecesnumber - 1; e++)
 		{
 			for (int ee = 0; ee < workpiecesnumber - 1 - e; ee++) // ÓÉÓÚtemp2´æ´¢¹¤¼şÉÏÒ»µÀ¹¤ĞòµÄÍê¹¤Ê±¼ä£¬ÔÚ½øĞĞÏÂÒ»µÀ¹¤ĞòÉú²úÊ±£¬°´ÕÕÏÈÍê¹¤ÏÈÉú²úµÄ
@@ -111,6 +112,7 @@ void fitness(int c)   //¼ÆËãÊÊÓ¦¶Èº¯Êı£¬c´ú±íÄ³¸öÌå£»
 				}
 			}
 		}
+		//
 		for (int e = 0; e < workpiecesnumber; e++)    //¸üĞÂtemp1£¬temp2µÄÊı¾İ£¬¿ªÊ¼ÏÂÒ»µÀ¹¤Ğò£»
 		{
 			temp1[e] = flg2[e];
@@ -118,14 +120,14 @@ void fitness(int c)   //¼ÆËãÊÊÓ¦¶Èº¯Êı£¬c´ú±íÄ³¸öÌå£»
 		}
 	}
 	totaltime = 0;
-	for (int i = 0; i < parallel; i++) //±È½Ï×îºóÒ»µÀ¹¤Ğò»úÆ÷µÄÀÛ¼Æ¼Ó¹¤Ê±¼ä£¬×î´óÊ±¼ä¾ÍÊÇ¸ÃÁ÷³ÌµÄ¼Ó¹¤Ê±¼ä£»
+	for (int i = 0; i < parallel[ordernumber - 1]; i++) //±È½Ï×îºóÒ»µÀ¹¤Ğò»úÆ÷µÄÀÛ¼Æ¼Ó¹¤Ê±¼ä£¬×î´óÊ±¼ä¾ÍÊÇ¸ÃÁ÷³ÌµÄ¼Ó¹¤Ê±¼ä£»
 		if (totaltime < machinetime[ordernumber - 1][i])
 		{
 			totaltime = machinetime[ordernumber - 1][i];
 		}
 	for (int i = 0; i < workpiecesnumber; i++)  //½«Êı×é¹éÁã£¬±ãÓÚÏÂÒ»¸ö¸öÌåµÄ¼Ó¹¤Ê±¼äÍ³¼Æ£»
 		for (int j = 0; j < ordernumber; j++)
-			for (int t = 0; t < parallel; t++)
+			for (int t = 0; t < parallel[i]; t++)
 			{
 				starttime[i][j][t] = 0;
 				finishtime[i][j][t] = 0;
@@ -134,18 +136,20 @@ void fitness(int c)   //¼ÆËãÊÊÓ¦¶Èº¯Êı£¬c´ú±íÄ³¸öÌå£»
 	makespan = totaltime;
 	fits[c] = 1.000 / makespan;          //½«makespanÈ¡µ¹Êı×÷ÎªÊÊÓ¦¶Èº¯Êı£»
 }
-
 void gant(int c)                   //¸Ãº¯ÊıÊÇÎªÁË½«×îºóµÄ½á¹û±ãÓÚÇåÎúÃ÷ÀÊµÄÕ¹Ê¾²¢×ö³É¸ÊÌØÍ¼£¬¶ÔÎÊÌâµÄ½á¹ûÒÔ¼°ÎÊÌâµÄ½â¾ö²¢Ã»ÓĞÓ°Ïì£»
 {
 	int totaltime;
-	char machine[ordernumber*parallel][100] = { "0" };
-	int temp1[workpiecesnumber] = { 0 }; //jiagongshunxu
-	int temp2[workpiecesnumber] = { 0 }; //shangyibuzhou de wan cheng shijian
+	char machine[ordernumber*MAXPARALLEL][500] = { "0" };
+	int temp1[workpiecesnumber] = { 0 }; //¼Ó¹¤Ë³Ğò
+	int temp2[workpiecesnumber] = { 0 }; //ÉÏÒ»²½ÖèµÄÍê³ÉÊ±¼ä
 	int temp3[workpiecesnumber] = { 0 };
 	//////////////////////////////////////////
 	for (int j = 0; j < workpiecesnumber; j++)
 	{
 		temp1[j] = a[c][j];
+		temp2[j] = (a[c][j] - 1);
+		temp3[j] = (a[c][j] - 1);
+		cout << "******" << temp1[j] << endl;
 	}
 	for (int i = 0; i < ordernumber; i++)
 	{
@@ -153,7 +157,7 @@ void gant(int c)                   //¸Ãº¯ÊıÊÇÎªÁË½«×îºóµÄ½á¹û±ãÓÚÇåÎúÃ÷ÀÊµÄÕ¹Ê¾²
 		{
 			int m = machinetime[i][0];
 			int n = 0;
-			for (int p = 0; p < parallel; p++) //ÕÒ³öÊ±¼ä×îĞ¡µÄ»úÆ÷£»
+			for (int p = 0; p < parallel[i]; p++) //ÕÒ³öÊ±¼ä×îĞ¡µÄ»úÆ÷£»
 			{
 				if (m > machinetime[i][p])
 				{
@@ -166,22 +170,23 @@ void gant(int c)                   //¸Ãº¯ÊıÊÇÎªÁË½«×îºóµÄ½á¹û±ãÓÚÇåÎúÃ÷ÀÊµÄÕ¹Ê¾²
 			machinetime[i][n] = starttime[q - 1][i][n] + usetime[q - 1][i];
 			finishtime[q - 1][i][n] = machinetime[i][n];
 			temp2[j] = finishtime[q - 1][i][n];
-			//cout<<"start:"<<starttime[q-1][i][n]<<"   use:"<<usetime[q-1][i]<<"  machine:"<<machinetime[i][n]<<"   finish:"<<finishtime[q-1][i][n]<<endl;
+			cout<<"q:"<<q<<"start:"<<starttime[q-1][i][n]<<"   use:"<<usetime[q-1][i]<<"  machine:"<<machinetime[i][n]<<"   finish:"<<finishtime[q-1][i][n]<<endl;
+
+			//machineÊÇgantÖĞĞĞ×Ö·ûÊı×é
+
+			/*for (int h = starttime[q - 1][i][n]; h < finishtime[q - 1][i][n]; h++)
+			{
+				if (q >= 0 && q < 26)
+					machine[i*MAXPARALLEL + n][h] = 'a' + q;
+				else
+					machine[i*MAXPARALLEL + n][h] = 'A' + (q - 26);
+			}*/
 			for (int h = starttime[q - 1][i][n]; h < finishtime[q - 1][i][n]; h++)
 			{
-				if (q == 1)
-					machine[i * 2 + n][h] = '1';
-				else if (q == 2)
-					machine[i * 2 + n][h] = '2';
-				else if (q == 3)
-					machine[i * 2 + n][h] = '3';
-				else if (q == 4)
-					machine[i * 2 + n][h] = '4';
-				else if (q == 5)
-					machine[i * 2 + n][h] = '5';
-				else
-					machine[i * 2 + n][h] = '6';
+				if (q >= 0)
+					machine[i*MAXPARALLEL + n][h] = '0' + q;
 			}
+
 		}
 		int flg2[workpiecesnumber] = { 0 };
 		for (int s = 0; s < workpiecesnumber; s++)
@@ -213,7 +218,7 @@ void gant(int c)                   //¸Ãº¯ÊıÊÇÎªÁË½«×îºóµÄ½á¹û±ãÓÚÇåÎúÃ÷ÀÊµÄÕ¹Ê¾²
 		}
 	}
 	totaltime = 0;
-	for (int i = 0; i < parallel; i++)
+	for (int i = 0; i < parallel[ordernumber - 1]; i++)
 		if (totaltime < machinetime[ordernumber - 1][i])
 		{
 			totaltime = machinetime[ordernumber - 1][i];
@@ -221,15 +226,21 @@ void gant(int c)                   //¸Ãº¯ÊıÊÇÎªÁË½«×îºóµÄ½á¹û±ãÓÚÇåÎúÃ÷ÀÊµÄÕ¹Ê¾²
 	cout << "total=" << totaltime << endl;
 	outfile << totaltime << endl;///////////////////////////////////////////////////////////////////////////////
 	flg7 = totaltime;
-	for (int u = 0; u < ordernumber*parallel; u++)
+
+	int idx = 0;
+	for (int i = 0; i < ordernumber; i++)
 	{
-		for (int uu = 0; uu < 100; uu++)
+		for (int u = 0; u < parallel[i]; u++)
 		{
-			outfile << machine[u][uu];
-			cout << machine[u][uu];
+			for (int uu = 0; uu < 100; uu++)
+			{
+				outfile << machine[idx + u][uu];
+				cout << machine[idx + u][uu];
+			}
+			outfile << endl;
+			cout << endl;
 		}
-		outfile << endl;
-		cout << endl;
+		idx += MAXPARALLEL;
 	}
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -382,33 +393,40 @@ void mutation()  //±äÒì²Ù×÷ÎªÁ½µã±äÒì£¬Ëæ»úÉú³ÉÁ½¸ö»ùÒòÎ»£¬²¢½»»»Á½¸ö»ùÒòµÄÎ»ÖÃ£
 }
 int main()
 {
-	ifstream ifs("input.txt");
-	outfile.open("output2.txt");
-	if (!ifs)
-	{
-		cout << "´ò¿ªÎÄ¼şÊ§°Ü£¡" << endl;
-	}
-	int l = 0;
-	while (ifs >> times[l])
-	{
-		l++;
-	}
-	ifs.close();  //¶ÁÈëÒÑÖªµÄ¼Ó¹¤Ê±¼ä£»
-	for (int i = 0; times[i] != 0; i++)
-	{
-		cout << times[i] << "  ";
-	}
-	cout << endl;
+	//ifstream ifs("input.txt");
+	//outfile.open("output0.txt");
+	//if (!ifs)
+	//{
+	//	cout << "´ò¿ªÎÄ¼şÊ§°Ü£¡" << endl;
+	//}
+	//int l = 0;
+	//while (ifs >> times[l])
+	//{
+	//	l++;
+	//}
+	//ifs.close();  //¶ÁÈëÒÑÖªµÄ¼Ó¹¤Ê±¼ä£»
+	//for (int i = 0; times[i] != 0; i++)
+	//{
+	//	cout << times[i] << "  ";
+	//}
+	//cout << endl;
+	//for (int i = 0; i < workpiecesnumber; i++)
+	//{
+	//	for (int j = 0; j < ordernumber; j++)
+	//	{
+	//		usetime[i][j] = times[ordernumber*i + j];
+	//		cout << usetime[i][j] << "  ";
+	//	}
+	//	cout << endl;
+	//}
+	//for (int i = 0; i < ordernumber; i++)
+	//	parallel[i] = 2;
 	for (int i = 0; i < workpiecesnumber; i++)
 	{
-		for (int j = 0; j < ordernumber; j++)
-		{
-			usetime[i][j] = times[ordernumber*i + j];
-			cout << usetime[i][j] << "  ";
-		}
-		cout << endl;
+		usetime[i][0] = 4; usetime[i][1] = 8; usetime[i][2] = 6;
 	}
-	cout << "//////////////////////////////////////////////////" << endl;;
+	parallel[0] = 3; parallel[1] = 8; parallel[2] = 5;
+	cout << "//////////////////////////////////////////////////" << endl;
 	srand(time(NULL));
 	initialization();    //³õÊ¼»¯ÖÖÈº£»
 	for (int g = 0; g < G; g++)
@@ -418,12 +436,6 @@ int main()
 			fitness(c);
 			ttime[c] = makespan;
 		}
-		//for (int i = 0; i < populationnumber; i++)
-		//	tmpStore[i] = ttime[i];
-		//sort(tmpStore, tmpStore + populationnumber);
-		//for (int i = 0; i < populationnumber; i++)
-		//	cout << tmpStore[i] << endl;
-		//cout << "===============================" << endl;
 		select();     //Ñ¡Ôñ²Ù×÷£»
 		crossover();  //½»²æ²Ù×÷£»
 		mutation();   //±äÒì²Ù×÷£»
@@ -433,14 +445,6 @@ int main()
 		fitness(c);
 		ttime[c] = makespan;
 	}
-	//cout << "*******************************" << endl;
-	//for (int i = 0; i < populationnumber; i++)
-	//	tmpStore[i] = ttime[i];
-	//sort(tmpStore, tmpStore + populationnumber);
-	//for (int i = 0; i < populationnumber; i++)
-	//	cout << tmpStore[i] << endl;
-	//cout << "*******************************" << endl;
-
 	int flg8 = ttime[0];
 	int flg9 = 0;
 	for (int c = 0; c < populationnumber; c++)  //¼ÆËã×îºóÒ»´úÃ¿¸ö¸öÌåµÄÊÊÓ¦¶È£¬²¢ÕÒ³ö×îÓÅ¸öÌå£»
@@ -451,7 +455,7 @@ int main()
 			flg9 = c;
 		}
 	}
-	gant(flg9);    //»­³ö¼òÒ×µÄÁ÷³ÌÍ¼£»
+	gant(flg9);   //»­³ö¼òÒ×µÄÁ÷³ÌÍ¼£»
 	outfile.close();
 	return 0;
 }
