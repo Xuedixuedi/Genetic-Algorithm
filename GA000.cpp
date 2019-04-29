@@ -9,13 +9,13 @@ using namespace std;
 ofstream outfile;
 #define MAXPARALLEL 30
 #define ordernumber 3     //¹¤ĞòÊı
-#define workpiecesnumber 8  //¹¤¼ş×ÜÊı
+#define workpiecesnumber 48  //¹¤¼ş×ÜÊı
 #define populationnumber 1000  //Ã¿Ò»´úÖÖÈºµÄ¸öÌåÊı
 int parallel[ordernumber];
 
 double crossoverrate = 0.6;            //½»²æ¸ÅÂÊ
 double mutationrate = 0.02;             //±äÒì¸ÅÂÊ
-int G = 1000;                       //Ñ­»·´úÊı100
+int G = 500;                       //Ñ­»·´úÊı100
 int usetime[workpiecesnumber][ordernumber];  //µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòµÄ¼Ó¹¤ÓÃÊ±£»
 int machinetime[ordernumber][MAXPARALLEL] = { 0 }; //µÚ¼¸µÀ¹¤ĞòµÄµÚ¼¸Ì¨²¢ĞĞ»úÆ÷µÄÍ³¼ÆÊ±¼ä£»
 int starttime[workpiecesnumber][ordernumber][MAXPARALLEL];//µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòÔÚµÚ¼¸Ì¨²¢ĞĞ»úÉÏ¿ªÊ¼¼Ó¹¤µÄÊ±¼ä£»
@@ -170,23 +170,17 @@ void gant(int c)                   //¸Ãº¯ÊıÊÇÎªÁË½«×îºóµÄ½á¹û±ãÓÚÇåÎúÃ÷ÀÊµÄÕ¹Ê¾²
 			machinetime[i][n] = starttime[q - 1][i][n] + usetime[q - 1][i];
 			finishtime[q - 1][i][n] = machinetime[i][n];
 			temp2[j] = finishtime[q - 1][i][n];
-			cout<<"q:"<<q<<"start:"<<starttime[q-1][i][n]<<"   use:"<<usetime[q-1][i]<<"  machine:"<<machinetime[i][n]<<"   finish:"<<finishtime[q-1][i][n]<<endl;
+			//cout<<"q:"<<q<<"start:"<<starttime[q-1][i][n]<<"   use:"<<usetime[q-1][i]<<"  machine:"<<machinetime[i][n]<<"   finish:"<<finishtime[q-1][i][n]<<endl;
 
 			//machineÊÇgantÖĞĞĞ×Ö·ûÊı×é
 
-			/*for (int h = starttime[q - 1][i][n]; h < finishtime[q - 1][i][n]; h++)
-			{
-				if (q >= 0 && q < 26)
-					machine[i*MAXPARALLEL + n][h] = 'a' + q;
-				else
-					machine[i*MAXPARALLEL + n][h] = 'A' + (q - 26);
-			}*/
 			for (int h = starttime[q - 1][i][n]; h < finishtime[q - 1][i][n]; h++)
 			{
-				if (q >= 0)
-					machine[i*MAXPARALLEL + n][h] = '0' + q;
+				if (q >= 0 && q < 26)
+					machine[i*MAXPARALLEL + n][h] = 'a' - 1 + q;
+				else
+					machine[i*MAXPARALLEL + n][h] = 'A' + (q - 26);
 			}
-
 		}
 		int flg2[workpiecesnumber] = { 0 };
 		for (int s = 0; s < workpiecesnumber; s++)
