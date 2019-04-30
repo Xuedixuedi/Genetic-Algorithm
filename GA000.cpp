@@ -8,19 +8,20 @@ using namespace std;
 
 ofstream outfile;
 #define MAXPARALLEL 30
-#define ordernumber 5     //¹¤ĞòÊı
-#define workpiecesnumber 7  //¹¤¼ş×ÜÊı
-#define populationnumber 2000  //Ã¿Ò»´úÖÖÈºµÄ¸öÌåÊı
+#define ordernumber 3     //¹¤ĞòÊı
+#define workpiecesnumber 11  //¹¤¼ş×ÜÊı
+#define populationnumber 500  //Ã¿Ò»´úÖÖÈºµÄ¸öÌåÊı
 int parallel[ordernumber];
 
 double crossoverrate = 0.6;            //½»²æ¸ÅÂÊ
 double mutationrate = 0.02;             //±äÒì¸ÅÂÊ
-int G = 1000;                       //Ñ­»·´úÊı100
-int usetime[workpiecesnumber][ordernumber] = {
-	{60,0,90,240,420},{78,150,90,0,0},{60,120,90,0,0},{60,162,0,0,0},
-	{48,144,0,288,0},{60,162,18,0,0},{60,120,90,240,420}
-};  //µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòµÄ¼Ó¹¤ÓÃÊ±£»
+int G = 200;                       //Ñ­»·´úÊı100
 //int usetime[workpiecesnumber][ordernumber];  //µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòµÄ¼Ó¹¤ÓÃÊ±£»
+int usetime[workpiecesnumber][ordernumber] = {
+	{60,120,90},{78,150,90},{60,120,90},{60,162,18},{48,144,30},
+	{60,162,18},{60,120,90},{78,150,90},{48,144,30},{48,144,30},
+	{60,162,18}
+};  //µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòµÄ¼Ó¹¤ÓÃÊ±£»
 int machinetime[ordernumber][MAXPARALLEL] = { 0 }; //µÚ¼¸µÀ¹¤ĞòµÄµÚ¼¸Ì¨²¢ĞĞ»úÆ÷µÄÍ³¼ÆÊ±¼ä£»
 int starttime[workpiecesnumber][ordernumber][MAXPARALLEL];//µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòÔÚµÚ¼¸Ì¨²¢ĞĞ»úÉÏ¿ªÊ¼¼Ó¹¤µÄÊ±¼ä£»
 int finishtime[workpiecesnumber][ordernumber][MAXPARALLEL];//µÚ¼¸¸ö¹¤¼şµÚ¼¸µÀ¹¤ĞòÔÚµÚ¼¸Ì¨²¢ĞĞ»úÉÏÍê³É¼Ó¹¤µÄÊ±¼ä£»
@@ -30,7 +31,9 @@ int times[100];  //ÓÃÀ´´æ´¢ÒÑÖªÓÃÊ±µÄÊı×é£»
 int makespan;    //×ÜµÄÁ÷³Ì¼Ó¹¤Ê±¼ä£»
 int flg7;   //ÔİÊ±´æ´¢Á÷³Ì¼Ó¹¤Ê±¼ä£»
 double fits[populationnumber];//´æ´¢Ã¿Ò»´úÖÖÈºÃ¿Ò»¸ö¸öÌåµÄÊÊÓ¦¶È£¬±ãÓÚ½øĞĞÑ¡Ôñ²Ù×÷£»
+
 int tmpStore[populationnumber];//ÓÃÀ´Êä³öÃ¿´ú¸öÌåÊıÖµ
+
 int initialization()   //³õÊ¼»¯ÖÖÈº£»ÖÖÈºÖĞ¸öÌåÏàÍ¬ ÅÅÁĞ¸÷²»Í¬
 {
 	for (int i = 0; i < populationnumber; i++)     //Ê×ÏÈÉú³ÉÒ»¸ö¹¤¼ş¸öÊıµÄÈ«ÅÅÁĞµÄ¸öÌå£»
@@ -61,7 +64,7 @@ int initialization()   //³õÊ¼»¯ÖÖÈº£»ÖÖÈºÖĞ¸öÌåÏàÍ¬ ÅÅÁĞ¸÷²»Í¬
 
 void fitness(int c)   //¼ÆËãÊÊÓ¦¶Èº¯Êı£¬c´ú±íÄ³¸öÌå£»
 {
-	int arrival[workpiecesnumber] = { 16,47,82,120,141,182,211 };
+	int arrival[workpiecesnumber] = { 16,47,82,120,141,182,211,239,241,267,309 };
 	int totaltime;      //×ÜµÄ¼Ó¹¤Á÷³ÌÊ±¼ä£¨makespan£©£»
 	int temp1[workpiecesnumber] = { 0 };
 	int temp2[workpiecesnumber] = { 0 };
@@ -141,13 +144,13 @@ void fitness(int c)   //¼ÆËãÊÊÓ¦¶Èº¯Êı£¬c´ú±íÄ³¸öÌå£»
 }
 void gant(int c)                   //¸Ãº¯ÊıÊÇÎªÁË½«×îºóµÄ½á¹û±ãÓÚÇåÎúÃ÷ÀÊµÄÕ¹Ê¾²¢×ö³É¸ÊÌØÍ¼£¬¶ÔÎÊÌâµÄ½á¹ûÒÔ¼°ÎÊÌâµÄ½â¾ö²¢Ã»ÓĞÓ°Ïì£»
 {
-	int arrival[workpiecesnumber] = { 16,47,82,120,141,182,211 };
+	int arrival[workpiecesnumber] = { 16,47,82,120,141,182,211,239,241,267,309 };
 	int totaltime;
 	char machine[ordernumber*MAXPARALLEL][500] = { "0" };
 	int temp1[workpiecesnumber] = { 0 }; //¼Ó¹¤Ë³Ğò
 	int temp2[workpiecesnumber] = { 0 }; //ÉÏÒ»²½ÖèµÄÍê³ÉÊ±¼ä
 	int temp3[workpiecesnumber] = { 0 };
-	////////////////////////////////////////
+	//////////////////////////////////////////
 	for (int j = 0; j < workpiecesnumber; j++)
 	{
 		temp1[j] = a[c][j];
@@ -173,8 +176,6 @@ void gant(int c)                   //¸Ãº¯ÊıÊÇÎªÁË½«×îºóµÄ½á¹û±ãÓÚÇåÎúÃ÷ÀÊµÄÕ¹Ê¾²
 	//			flg2[ee] = flg2[ee + 1];
 	//			temp2[ee + 1] = flg5;
 	//			flg2[ee + 1] = flg6;
-	//			//swap(temp2[ee],temp2[ee+1]);
-	//			//swap(flg2[ee],flg2[ee+1]);
 	//		}
 	//	}
 	//}
@@ -204,17 +205,17 @@ void gant(int c)                   //¸Ãº¯ÊıÊÇÎªÁË½«×îºóµÄ½á¹û±ãÓÚÇåÎúÃ÷ÀÊµÄÕ¹Ê¾²
 			machinetime[i][n] = starttime[q - 1][i][n] + usetime[q - 1][i];
 			finishtime[q - 1][i][n] = machinetime[i][n];
 			temp2[j] = finishtime[q - 1][i][n];
-			cout<<"q:"<<q<<"start:"<<starttime[q-1][i][n]<<"   use:"<<usetime[q-1][i]<< "  machine_idx:"<<n <<"  machine:"<<machinetime[i][n]<<"   finish:"<<finishtime[q-1][i][n]<<endl;
+			//cout<<"q:"<<q<<"start:"<<starttime[q-1][i][n]<<"   use:"<<usetime[q-1][i]<<"  machine:"<<machinetime[i][n]<<"   finish:"<<finishtime[q-1][i][n]<<endl;
 
 			//machineÊÇgantÖĞĞĞ×Ö·ûÊı×é
 
 			for (int h = starttime[q - 1][i][n]; h < finishtime[q - 1][i][n]; h++)
 			{
 				//machine[i*MAXPARALLEL + n][h] = '0' + q;
-				if (q >= 0 && q < 10)
-					machine[i*MAXPARALLEL + n][h] = '0' + q;
+				if (q >= 0 && q < 26)
+					machine[i*MAXPARALLEL + n][h] = 'a' + q;
 				else
-					machine[i*MAXPARALLEL + n][h] = 'A' + (q - 10);
+					machine[i*MAXPARALLEL + n][h] = 'A' + (q - 26);
 			}
 		}
 		int flg2[workpiecesnumber] = { 0 };
@@ -402,7 +403,9 @@ void crossover()
 
 
 }
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void mutation()  //±äÒì²Ù×÷ÎªÁ½µã±äÒì£¬Ëæ»úÉú³ÉÁ½¸ö»ùÒòÎ»£¬²¢½»»»Á½¸ö»ùÒòµÄÎ»ÖÃ£»
 {
 	int n3 = rand() % 20;
@@ -420,24 +423,44 @@ void mutation()  //±äÒì²Ù×÷ÎªÁ½µã±äÒì£¬Ëæ»úÉú³ÉÁ½¸ö»ùÒòÎ»£¬²¢½»»»Á½¸ö»ùÒòµÄÎ»ÖÃ£
 }
 int main()
 {
+	//ifstream ifs("input.txt");
+	//outfile.open("output0.txt");
+	//if (!ifs)
+	//{
+	//	cout << "´ò¿ªÎÄ¼şÊ§°Ü£¡" << endl;
+	//}
+	//int l = 0;
+	//while (ifs >> times[l])
+	//{
+	//	l++;
+	//}
+	//ifs.close();  //¶ÁÈëÒÑÖªµÄ¼Ó¹¤Ê±¼ä£»
+	//for (int i = 0; times[i] != 0; i++)
+	//{
+	//	cout << times[i] << "  ";
+	//}
+	//cout << endl;
+	//for (int i = 0; i < workpiecesnumber; i++)
+	//{
+	//	for (int j = 0; j < ordernumber; j++)
+	//	{
+	//		usetime[i][j] = times[ordernumber*i + j];
+	//		cout << usetime[i][j] << "  ";
+	//	}
+	//	cout << endl;
+	//}
+	//for (int i = 0; i < ordernumber; i++)
+	//	parallel[i] = 2;
 	//for (int i = 0; i < workpiecesnumber; i++)
 	//{
 	//	usetime[i][0] = 4; usetime[i][1] = 8; usetime[i][2] = 6;
 	//}
-	parallel[0] = 3; parallel[1] = 8; parallel[2] = 5; parallel[3] = 3; parallel[4] = 2;
+	parallel[0] = 3; parallel[1] = 8; parallel[2] = 5;
 	cout << "//////////////////////////////////////////////////" << endl;
 	srand(time(NULL));
 	initialization();    //³õÊ¼»¯ÖÖÈº£»
 	for (int g = 0; g < G; g++)
 	{
-		//cout << "*******************************" << endl;
-		//for (int i = 0; i < populationnumber; i++)
-		//	tmpStore[i] = ttime[i];
-		//sort(tmpStore, tmpStore + populationnumber);
-		//for (int i = 0; i < populationnumber/10; i++)
-		//	cout << tmpStore[i] << endl;
-		//cout << "*******************************" << endl;
-
 		for (int c = 0; c < populationnumber; c++)//¼ÆËãÃ¿¸ö¸öÌåÊÊÓ¦¶È²¢´æÔÚttimeÖĞ£»
 		{
 			fitness(c);
@@ -464,6 +487,5 @@ int main()
 	}
 	gant(flg9);   //»­³ö¼òÒ×µÄÁ÷³ÌÍ¼£»
 	outfile.close();
-	system("pause");
 	return 0;
 }
