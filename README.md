@@ -1,14 +1,18 @@
-# Big-Program
-## Face to double elephant big program  
+# Genetic_Algorithm
+## 遗传算法求解动车组检修问题
 
-### members  
+> 2019年同济大学数学建模校赛题目。
+>
+> 时间：2019.4.27-2019.5.1
 
-HugeCute JJLi zzlg lxd
+题目：
 
-### Game's Name
+[动车组检修](<http://math.tongji.edu.cn/model/tjjs2019B.html>)
 
-"Killing Mr. Kuan"
+成员：
 
-### Videos
+- LXD
+- WZJ
+- YXL
 
-cxk plays basketball.avi
+论文：在文件里面，您自个儿看吧：）
