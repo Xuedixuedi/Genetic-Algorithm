@@ -433,13 +433,12 @@ int main()
 		fitness(c);
 		ttime[c] = makespan;
 	}
-	//cout << "*******************************" << endl;
-	//for (int i = 0; i < populationnumber; i++)
-	//	tmpStore[i] = ttime[i];
-	//sort(tmpStore, tmpStore + populationnumber);
-	//for (int i = 0; i < populationnumber; i++)
-	//	cout << tmpStore[i] << endl;
-	//cout << "*******************************" << endl;
+	for (int i = 0; i < populationnumber; i++)
+		tmpStore[i] = ttime[i];
+	sort(tmpStore, tmpStore + populationnumber);
+	for (int i = 0; i < populationnumber; i++)
+		cout << tmpStore[i] << endl;
+	cout << "*******************************" << endl;
 
 	int flg8 = ttime[0];
 	int flg9 = 0;
